@@ -13,7 +13,7 @@ public class MainServeur {
     }
 
     public void runServeur() throws IOException {
-        while(true){
+        while(isRunning){
             Socket nouvelleConnection = this.socketEcouteSeveur.accept();
         }
     }
@@ -24,10 +24,32 @@ public class MainServeur {
             @Override
             public void run() {
                 while(isRunning == true){
+                    try {
+                        //On attend une connexion d'un client
+                        Socket client = socketEcouteSeveur.accept();
 
+                        //Une fois reçue, on la traite dans un thread séparé
+                        System.out.println("Connexion cliente reçue.");
+                        Thread t = new Thread(new ChildServeur(client));
+                        t.start();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
+
+                try {
+                    socketEcouteSeveur.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    socketEcouteSeveur = null;
+                }
+                }
         });
+    }
+
+    public void closeConnection(){
+        isRunning= false;
     }
 
 }
