@@ -15,7 +15,6 @@ public class MainServeur {
     public void runServeur() throws IOException {
         while(true){
             Socket nouvelleConnection = this.socketEcouteSeveur.accept();
-
         }
     }
 

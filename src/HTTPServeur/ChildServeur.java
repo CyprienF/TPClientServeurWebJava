@@ -27,7 +27,7 @@ public class ChildServeur implements Runnable {
 
             try {
                 writer  = new PrintWriter(sock.getOutputStream());
-                reader = new BufferedInputStream(sock.getInputStream())
+                reader = new BufferedInputStream(sock.getInputStream());
                 //On attend la demande du client
                 String reponse = read();
                 InetSocketAddress remote = (InetSocketAddress)sock.getRemoteSocketAddress();
