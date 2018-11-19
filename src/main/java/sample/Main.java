@@ -16,6 +16,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class Main extends Application {
 
@@ -67,7 +68,12 @@ public class Main extends Application {
         // Webview
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
-        engine.load("http://www.oracle.com");
+        URL url = this.getClass().getResource("/toto.html");
+        engine.load(url.toString());
+
+        // Charger du texte brut
+        //engine.loadContent("Salut");
+
         GridPane.setConstraints(webView, 2, 4);
         grid.getChildren().add(webView);
 
