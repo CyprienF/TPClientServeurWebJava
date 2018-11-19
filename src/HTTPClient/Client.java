@@ -1,4 +1,4 @@
-package HTTPclient;
+package HTTPClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -8,48 +8,56 @@ import java.net.Socket;
 public class Client {
 
     private Socket socket;
-    private static final String adresse = "127.0.0.1";
-    private static final int port = 1026;
-    private static final String request = "http://polytech.univ-lyon1.fr";
+
+    public Client() {
+
+    }
 
     public Client(Socket socket) {
         this.socket = socket;
     }
 
-    public void runClient() {
-        try {
-            socket = new Socket("fr.wikipedia.org", port);
+    public void runClient(String host, String path, int port) throws IOException {
 
-            String request = "GET /wiki/Digital_Learning HTTP/1.1\r\n";
+        this.socket = new Socket(host, port);
 
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            out.writeBytes(request);
-            out.flush();
+        DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
+        DataInputStream in = new DataInputStream(this.socket.getInputStream());
 
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            String data = in.readLine();
+        String request = "GET " + path + " HTTP/1.1\r\n";
+        request += "Host: "+ host + "\r\n";
+        request += "\r\n";
 
-            String content = "";
-            int count = in.available();
-            byte[] buffer = new byte[count];
-            int stream;
+        sendMessage(out, request);
+        readResponse(in);
 
-            while((stream = in.read(buffer)) != -1){
-                content += new String(buffer, 0, stream);
-            }
+        out.close();
+        in.close();
+        this.closeSocket();
+    }
 
-            this.closeSocket();
+    private static void sendMessage(DataOutputStream out, String request) throws IOException {
+        System.out.println("* Request");
+        System.out.println(request);
 
-        } catch (IOException e) {
-            System.out.println(e);
+        out.write(request.getBytes());
+        out.flush();
+    }
+
+    private static void readResponse(DataInputStream in) throws IOException {
+        System.out.println("* Response");
+
+        String content = "";
+        while ((content = in.readLine()) != null) {
+            System.out.println(content);
         }
     }
 
-    public void closeSocket() {
+    private void closeSocket() {
         try {
             this.socket.close();
-        } catch (IOException e) {
             System.out.println("The socket is closed");
+        } catch (IOException e) {
             System.out.println(e);
         }
     }
