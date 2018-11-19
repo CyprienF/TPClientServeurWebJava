@@ -53,10 +53,6 @@ public class Client {
         }
     }
 
-    private static void readImage() {
-
-    }
-
     private void closeSocket() {
         try {
             this.socket.close();
