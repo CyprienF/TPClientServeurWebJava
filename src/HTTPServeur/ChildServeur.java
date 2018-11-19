@@ -1,22 +1,21 @@
 package HTTPServeur;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.stream.Collectors;
 
 public class ChildServeur implements Runnable {
     private Socket sock;
     private PrintWriter writer = null;
-    private BufferedInputStream reader = null;
+    private BufferedReader reader = null;
 
     public ChildServeur(Socket sock) {
         this.sock = sock;
     }
 
+    @Override
     public void run(){
         System.out.println("Initialisation connection Cliente");
         boolean closeConnexion = false;
@@ -24,10 +23,10 @@ public class ChildServeur implements Runnable {
         //while the cpnnection is still active we treat the different demands
 
         while(!sock.isClosed()){
-
             try {
+
                 writer  = new PrintWriter(sock.getOutputStream());
-                reader = new BufferedInputStream(sock.getInputStream());
+                reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                 //On attend la demande du client
                 String reponse = read();
                 InetSocketAddress remote = (InetSocketAddress)sock.getRemoteSocketAddress();
@@ -39,17 +38,25 @@ public class ChildServeur implements Runnable {
                 debug += " Sur le port : " + remote.getPort() + ".\n";
                 debug += "\t -> Commande reçue : " + reponse + "\n";
                 System.err.println("\n" + debug);
-
+                System.out.println(("TEST").getBytes().length);
                 //On traite la demande du client en fonction de la commande envoyée
-                String toSend = "";
+                String toSend = "HTTP/1.1 200 OK \r\n" +
+                        "Date: Thu, 04 Nov 2004 11:30:07 GMT \r\n" +
+                        "Server: Apache/1.3.12 (Unix) \r\n" +
+                        "Last-Modified: Thu, 04 Nov 2004 11:30:16 GMT \r\n" +
+                        "Content-Length: 4 \r\n" +
+                        "Connection: close \r\n" +
+                        "Content-Type: text/html \r\n" +
+                        "\r\n" +
+                        "TEST"+
+                        "\n\n";
 
-                //Traitement des donnée reçut
+                //Traitement des données reçues
                 writer.write(toSend);
                 //Il FAUT IMPERATIVEMENT UTILISER flush()
                 //Sinon les données ne seront pas transmises au client
                 //et il attendra indéfiniment
                 writer.flush();
-                
                 if(closeConnexion){
                     System.err.println("COMMANDE CLOSE DETECTEE ! ");
                     writer = null;
@@ -67,11 +74,7 @@ public class ChildServeur implements Runnable {
     }
 
     private String read() throws IOException {
-        String response = "";
-        int stream;
-        byte[] b = new byte[4096];
-        stream = reader.read(b);
-        response = new String(b, 0, stream);
-        return response;
+        String test=reader.readLine();
+      return test;
     }
 }
