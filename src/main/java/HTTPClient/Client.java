@@ -1,4 +1,4 @@
-package java.HTTPClient;
+package HTTPClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -51,6 +51,10 @@ public class Client {
         while ((content = in.readLine()) != null) {
             System.out.println(content);
         }
+    }
+
+    private static void readImage() {
+
     }
 
     private void closeSocket() {

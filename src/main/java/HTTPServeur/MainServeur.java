@@ -1,4 +1,4 @@
-package java.HTTPServeur;
+package HTTPServeur;
 
 import java.io.IOException;
 import java.net.ServerSocket;

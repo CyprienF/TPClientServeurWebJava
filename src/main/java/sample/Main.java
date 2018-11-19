@@ -1,6 +1,6 @@
-package java.sample;
+package sample;
 
-import java.HTTPClient.Client;
+import HTTPClient.Client;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -61,6 +63,13 @@ public class Main extends Application {
         Button chercher = new Button("Chercher");
         GridPane.setConstraints(chercher, 0, 3);
         grid.getChildren().add(chercher);
+
+        // Webview
+        WebView webView = new WebView();
+        WebEngine engine = webView.getEngine();
+        engine.load("http://www.oracle.com");
+        GridPane.setConstraints(webView, 2, 4);
+        grid.getChildren().add(webView);
 
         chercher.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
