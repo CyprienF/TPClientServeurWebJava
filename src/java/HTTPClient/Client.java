@@ -1,4 +1,4 @@
-package HTTPClient;
+package java.HTTPClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

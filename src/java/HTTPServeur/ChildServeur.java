@@ -1,10 +1,9 @@
-package HTTPServeur;
+package java.HTTPServeur;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.stream.Collectors;
 
 public class ChildServeur implements Runnable {
     private Socket sock;
