@@ -26,7 +26,7 @@ public class ChildServeur implements Runnable {
 
         while(!sock.isClosed()){
             try {
-
+                sock.setSoTimeout(10000);
                 writer  = new PrintWriter(sock.getOutputStream());
                 reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                 //On attend la demande du client
@@ -44,19 +44,10 @@ public class ChildServeur implements Runnable {
                 System.err.println("\n" + debug);
 
                 //On traite la demande du client en fonction de la commande envoyée
-                String toSend = "HTTP/1.1 200 OK \r\n" +
-                        "Date: Thu, 04 Nov 2004 11:30:07 GMT \r\n" +
-                        "Server: Apache/1.3.12 (Unix) \r\n" +
-                        "Last-Modified: Thu, 04 Nov 2004 11:30:16 GMT \r\n" +
-                        "Content-Length: 4 \r\n" +
-                        "Connection: close \r\n" +
-                        "Content-Type: text/html \r\n" +
-                        "\r\n" +
-                        "TEST"+
-                        "\n\n";
+                String toSend =getFile(reponse);
 
                 //Traitement des données reçues
-                writer.write(getFile(reponse));
+                writer.write(toSend);
                 //Il FAUT IMPERATIVEMENT UTILISER flush()
                 //Sinon les données ne seront pas transmises au client
                 //et il attendra indéfiniment
@@ -83,50 +74,71 @@ public class ChildServeur implements Runnable {
     };
 
     private String getFile(String reponses){
-        String[] route =reponses.split(" ");
-
-        File file = new File("./src/main/resources/"+route[1]);
-        String toSend;
         try{
-            Scanner sc = new Scanner(file);
-            toSend = "HTTP/1.1 200 OK \r\n" +
-                    "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
-                    "Server: Apache/1.3.12 (Unix) \r\n" +
+            String[] route =reponses.split(" ");
+
+            File file = new File("./src/main/resources/"+route[1]);
+            String toSend;
+            try{
+                Scanner sc = new Scanner(file);
+                toSend = "HTTP/1.1 200 OK \r\n" +
+                        "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
+                        "Server: Apache/1.3.12 (Unix) \r\n" +
                         "Last-Modified: "+ new Timestamp(file.lastModified()) +"\r\n" +
-                    "Content-Length: "+ file.length() +"\r\n" +
-                    "Connection: active \r\n" +
-                    "Content-Type: text/html \r\n" +
-                    "\r\n";
-            while (sc.hasNextLine())
-                toSend+=sc.nextLine();
+                        "Content-Length: "+ file.length() +"\r\n" +
+                        "Connection: active \r\n" +
+                        "Content-Type: text/html \r\n" +
+                        "\r\n";
+                while (sc.hasNextLine())
+                    toSend+=sc.nextLine();
 
-            toSend+="\n\n";
-            return toSend;
-        }catch (Exception e) {
-            System.err.println("Le fichier n'exisite pas");
-            toSend="HTTP/1.1 404 Not Found\r\n" +
-            "Date: Sun, 18 Oct 2012 10:36:20 GMT \r\n" +
-            "Server: Apache/2.2.14 (Win32) \r\n" +
-            "Content-Length: 230 \r\n" +
-            "Content-Type: text/html; charset=iso-8859-1 \r\n" +
-            "Connection: Closed \r\n" +
-            "\r\n";
-            toSend+="<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
-                    "<html>\n" +
-                    "\n" +
-                    "<head>\n" +
-                    "   <title>404 Not Found</title>\n" +
-                    "</head>\n" +
-                    "\n" +
-                    "<body>\n" +
-                    "   <h1>Not Found</h1>\n" +
-                    "   <p>The requested URL "+route[1]+"was not found on this server.</p>\n" +
-                    "</body>\n" +
-                    "\n" +
-                    "</html>";
-            return toSend;
-
+                toSend+="\n\n";
+                return toSend;
+            }catch (Exception e) {
+                System.err.println("Le fichier n'exisite pas");
+                toSend="HTTP/1.1 404 Not Found\r\n" +
+                        "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
+                        "Server: Apache/2.2.14 (Win32) \r\n" +
+                        "Content-Length: 230 \r\n" +
+                        "Content-Type: text/html; charset=iso-8859-1 \r\n" +
+                        "Connection: Closed \r\n" +
+                        "\r\n";
+                toSend+="<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
+                        "<html>\n" +
+                        "\n" +
+                        "<head>\n" +
+                        "   <title>404 Not Found</title>\n" +
+                        "</head>\n" +
+                        "\n" +
+                        "<body>\n" +
+                        "   <h1>Not Found</h1>\n" +
+                        "   <p>The requested URL "+route[1]+"was not found on this server.</p>\n" +
+                        "</body>\n" +
+                        "\n" +
+                        "</html>";
+                return toSend;
+            }
+        }catch (Exception e){
+            return send500Error();
         }
 
+    }
+
+    private String send500Error(){
+       String  toSend="HTTP/1.1 500 Internal Server Error\r\n" +
+                "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
+                "Server: Apache/2.2.14 (Win32) \r\n" +
+                "Content-Length: 230 \r\n" +
+                "Content-Type: text/html; charset=iso-8859-1 \r\n" +
+                "Connection: Closed \r\n" +
+                "\r\n";
+        toSend+="!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
+                "<html><head>\n" +
+                "<title>500 Internal Server Error</title>\n" +
+                "</head><body>\n" +
+                "<h1>Server Error</h1>\n" +
+                "</body></html>";
+
+    return toSend;
     }
 }
