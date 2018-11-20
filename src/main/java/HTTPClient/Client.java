@@ -1,9 +1,12 @@
 package HTTPClient;
 
+import javafx.scene.web.WebEngine;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
 
@@ -28,8 +31,9 @@ public class Client {
         request += "Host: "+ host + "\r\n";
         request += "\r\n";
 
+
         sendMessage(out, request);
-        readResponse(in);
+        String response= readResponse(in);
 
         out.close();
         in.close();
@@ -44,13 +48,35 @@ public class Client {
         out.flush();
     }
 
-    private static void readResponse(DataInputStream in) throws IOException {
+    private static String readResponse(DataInputStream in) throws IOException {
         System.out.println("* Response");
 
         String content = "";
-        while ((content = in.readLine()) != null) {
-            System.out.println(content);
+        String tmp="";
+
+        while ((tmp = in.readLine()) != null) {
+            System.out.println(tmp);
+            content+=tmp;
         }
+        return content;
+    }
+
+    private String getBody(String s){
+        String body = "";
+        String tmp="";
+        Scanner sc = new Scanner(s);
+        boolean bodyFound=false;
+        while (sc.hasNextLine()){
+            tmp=sc.nextLine();
+            System.out.println(tmp);
+            if(tmp.startsWith("\r\n")){
+                bodyFound=!bodyFound;
+            }
+            if(bodyFound){
+                body+=tmp;
+            }
+        }
+        return body;
     }
 
     private static void readImage() {
