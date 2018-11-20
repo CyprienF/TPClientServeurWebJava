@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 import java.util.Scanner;
 
 public class ChildServeur implements Runnable {
@@ -40,6 +41,8 @@ public class ChildServeur implements Runnable {
                 debug += " Sur le port : " + remote.getPort() + ".\n";
                 debug += "\t -> Commande reçue : " + reponse + "\n";
 
+                if(reponse==null)
+                    closeConnexion =true;
 
                 System.err.println("\n" + debug);
 
@@ -76,48 +79,41 @@ public class ChildServeur implements Runnable {
     private String getFile(String reponses){
         try{
             String[] route =reponses.split(" ");
-
-            File file = new File("./src/main/resources/"+route[1]);
             String toSend;
-            try{
-                Scanner sc = new Scanner(file);
-                toSend = "HTTP/1.1 200 OK \r\n" +
-                        "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
-                        "Server: Apache/1.3.12 (Unix) \r\n" +
-                        "Last-Modified: "+ new Timestamp(file.lastModified()) +"\r\n" +
-                        "Content-Length: "+ file.length() +"\r\n" +
-                        "Connection: active \r\n" +
-                        "Content-Type: text/html \r\n" +
-                        "\r\n";
-                while (sc.hasNextLine())
-                    toSend+=sc.nextLine();
+            File file = new File("./src/main/resources"+route[1]);
 
-                toSend+="\n\n";
-                return toSend;
-            }catch (Exception e) {
-                System.err.println("Le fichier n'exisite pas");
-                toSend="HTTP/1.1 404 Not Found\r\n" +
-                        "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
-                        "Server: Apache/2.2.14 (Win32) \r\n" +
-                        "Content-Length: 230 \r\n" +
-                        "Content-Type: text/html; charset=iso-8859-1 \r\n" +
-                        "Connection: Closed \r\n" +
+            toSend = "HTTP/1.1 200 OK \r\n" +
+                    "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
+                    "Server: Apache/1.3.12 (Unix) \r\n" +
+                    "Last-Modified: "+ new Timestamp(file.lastModified()) +"\r\n" +
+                    "Content-Length: "+ file.length() +"\r\n" +
+                    "Connection: close \r\n" ;
+            if(route[1].startsWith("/text")){
+
+               try{
+                   Scanner sc = new Scanner(file);
+                   toSend += "Content-Type: text/html \r\n" +
+                           "\r\n";
+                   while (sc.hasNextLine())
+                       toSend+=sc.nextLine();
+                   return toSend;
+               }catch(FileNotFoundException e){
+                  return  send404Error(route[1]);
+               }
+
+            }else if(route[1].startsWith("/image")){
+                try{
+                toSend += "Content-Type: image \r\n" +
                         "\r\n";
-                toSend+="<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
-                        "<html>\n" +
-                        "\n" +
-                        "<head>\n" +
-                        "   <title>404 Not Found</title>\n" +
-                        "</head>\n" +
-                        "\n" +
-                        "<body>\n" +
-                        "   <h1>Not Found</h1>\n" +
-                        "   <p>The requested URL "+route[1]+"was not found on this server.</p>\n" +
-                        "</body>\n" +
-                        "\n" +
-                        "</html>";
-                return toSend;
+                toSend +=encodeFileToBase64Binary(file);
+                }catch(IOException e){
+                    return  send404Error(route[1]);
+                }
+
             }
+                toSend+="\n\n";
+
+            return toSend;
         }catch (Exception e){
             return send500Error();
         }
@@ -140,5 +136,39 @@ public class ChildServeur implements Runnable {
                 "</body></html>";
 
     return toSend;
+    }
+
+    private String send404Error(String path){
+        String toSend="HTTP/1.1 404 Not Found\r\n" +
+                "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
+                "Server: Apache/2.2.14 (Win32) \r\n" +
+                "Content-Length: 230 \r\n" +
+                "Content-Type: text/html; charset=iso-8859-1 \r\n" +
+                "Connection: Closed \r\n" +
+                "\r\n";
+        toSend+="<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
+                "<html>\n" +
+                "\n" +
+                "<head>\n" +
+                "   <title>404 Not Found</title>\n" +
+                "</head>\n" +
+                "\n" +
+                "<body>\n" +
+                "   <h1>Not Found</h1>\n" +
+                "   <p>The requested URL "+path+"was not found on this server.</p>\n" +
+                "</body>\n" +
+                "\n" +
+                "</html>";
+        return toSend;
+    }
+    private static String encodeFileToBase64Binary(File file) throws IOException {
+        String encodedfile = null;
+
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int)file.length()];
+            fileInputStreamReader.read(bytes);
+            encodedfile = new String(Base64.getMimeEncoder().encodeToString(bytes));
+
+        return encodedfile;
     }
 }
