@@ -83,6 +83,9 @@ public class Main extends Application {
                         client = new Client();
                         try {
                             client.runClient(hostTextfield.getText(), pathTextfield.getText(), Integer.parseInt(portTextfield.getText()));
+
+                            URL content = new URL("http://" + hostTextfield.getText() + ":" + Integer.parseInt(portTextfield.getText()) + "" + pathTextfield.getText());
+                            engine.load(content.toString());
                         } catch (IOException ex) {
                             System.out.println(ex);
                         }

@@ -79,10 +79,6 @@ public class Client {
         return body;
     }
 
-    private static void readImage() {
-
-    }
-
     private void closeSocket() {
         try {
             this.socket.close();
