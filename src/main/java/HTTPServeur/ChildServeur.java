@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class ChildServeur implements Runnable {
     private Socket sock;
-    private PrintWriter writer = null;
+    private OutputStream writer = null;
     private BufferedReader reader = null;
 
     public ChildServeur(Socket sock) {
@@ -27,9 +27,9 @@ public class ChildServeur implements Runnable {
 
         while(!sock.isClosed()){
             try {
-                sock.setSoTimeout(10000);
-                writer  = new PrintWriter(sock.getOutputStream());
+                //sock.setSoTimeout(10000);
                 reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+                writer  = sock.getOutputStream();
                 //On attend la demande du client
                 String reponse = read();
                 InetSocketAddress remote = (InetSocketAddress)sock.getRemoteSocketAddress();
@@ -50,11 +50,13 @@ public class ChildServeur implements Runnable {
                 String toSend =getFile(reponse);
 
                 //Traitement des données reçues
-                writer.write(toSend);
+
+                writer.write(toSend.getBytes());
                 //Il FAUT IMPERATIVEMENT UTILISER flush()
                 //Sinon les données ne seront pas transmises au client
                 //et il attendra indéfiniment
                 writer.flush();
+                writer.close();
                 if(closeConnexion){
                     System.err.println("COMMANDE CLOSE DETECTEE ! ");
                     writer = null;
@@ -92,11 +94,13 @@ public class ChildServeur implements Runnable {
 
                try{
                    Scanner sc = new Scanner(file);
-                   toSend += "Content-Type: text/html \r\n" +
+                   toSend += "Content-Type: text \r\n" +
                            "\r\n";
+
                    while (sc.hasNextLine())
-                       toSend+=sc.nextLine();
-                   return toSend;
+                       toSend+=sc.nextLine()+"\r\n";
+
+                   toSend +="\r\n";
                }catch(FileNotFoundException e){
                   return  send404Error(route[1]);
                }
@@ -106,6 +110,7 @@ public class ChildServeur implements Runnable {
                 toSend += "Content-Type: image \r\n" +
                         "\r\n";
                 toSend +=encodeFileToBase64Binary(file);
+                toSend +="\r\n";
                 }catch(IOException e){
                     return  send404Error(route[1]);
                 }

@@ -1,11 +1,15 @@
 package HTTPClient;
 
 import javafx.scene.web.WebEngine;
+import sun.misc.BASE64Decoder;
+import sun.misc.IOUtils;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.io.*;
 import java.net.Socket;
+import java.nio.Buffer;
 import java.util.Scanner;
 
 public class Client {
@@ -24,9 +28,9 @@ public class Client {
 
         this.socket = new Socket(host, port);
 
-        DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
-        DataInputStream in = new DataInputStream(this.socket.getInputStream());
 
+        DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
+        InputStream in = this.socket.getInputStream();
         String request = "GET " + path + " HTTP/1.1\r\n";
         request += "Host: "+ host + "\r\n";
         request += "\r\n";
@@ -34,6 +38,10 @@ public class Client {
 
         sendMessage(out, request);
         String response= readResponse(in);
+        System.out.println("bug corrected");
+
+        String body = getBody(response);
+        writeFile(path,body,isBodyImage(response));
 
         out.close();
         in.close();
@@ -48,16 +56,25 @@ public class Client {
         out.flush();
     }
 
-    private static String readResponse(DataInputStream in) throws IOException {
-        System.out.println("* Response");
+    private boolean isBodyImage(String message){
+        Scanner sc = new Scanner(message);
+        String line;
+        while (sc.hasNextLine()){
+            line=sc.nextLine();
+            if(line.startsWith("Content-Type")){
+                return line.split(" ")[1].contains("image");
+            }
+        }
+        return false;
+    }
 
+    private static String readResponse(InputStream in) throws IOException {
+        System.out.println("* Response");
         String content = "";
         String tmp="";
+        byte[] test =IOUtils.readFully(in,-1,true );
 
-        while ((tmp = in.readLine()) != null) {
-            System.out.println(tmp);
-            content+=tmp;
-        }
+        content= new String(test);
         return content;
     }
 
@@ -69,16 +86,49 @@ public class Client {
         while (sc.hasNextLine()){
             tmp=sc.nextLine();
             System.out.println(tmp);
-            if(tmp.startsWith("\r\n")){
-                bodyFound=!bodyFound;
-            }
             if(bodyFound){
-                body+=tmp;
+                body+=tmp+"\r\n";
+            }
+            if(tmp.isEmpty()&& !bodyFound){
+                bodyFound=!bodyFound;
             }
         }
         return body;
     }
 
+    private void writeFile(String path,String body, boolean isImage){
+        try {
+            File outputfile = new File("./src/main/resources/download"+path);
+        if(isImage){
+
+            BufferedImage image = null;
+            byte[] imageByte;
+
+            BASE64Decoder decoder = new BASE64Decoder();
+            imageByte = decoder.decodeBuffer(body);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            image = ImageIO.read(bis);
+            bis.close();
+            // write the image to a file
+
+            String[] decomposedPath= path.split("/");
+            String fileName[]= (decomposedPath[decomposedPath.length-1]).split("\\.");
+            String formatName = fileName[fileName.length-1];
+            ImageIO.write(image, formatName, outputfile);
+
+
+        }else{
+            System.out.println(body);
+            FileWriter fileWriter = new FileWriter(outputfile);
+            fileWriter.write(body);
+            fileWriter.flush();
+            fileWriter.close();
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
     private void closeSocket() {
         try {
             this.socket.close();

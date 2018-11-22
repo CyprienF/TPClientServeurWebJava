@@ -47,6 +47,7 @@ public class Main extends Application {
 
         // Path TextField
         final TextField pathTextfield = new TextField();
+
         GridPane.setConstraints(pathTextfield, 1, 1);
         grid.getChildren().add(pathTextfield);
 
@@ -68,7 +69,7 @@ public class Main extends Application {
         // Webview
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
-        URL url = this.getClass().getResource("/toto.html");
+        URL url = this.getClass().getResource("/text/toto.txt");
         engine.load(url.toString());
 
         // Charger du texte brut
@@ -76,7 +77,9 @@ public class Main extends Application {
 
         GridPane.setConstraints(webView, 2, 4);
         grid.getChildren().add(webView);
-
+        hostTextfield.setText("127.0.0.1");
+        pathTextfield.setText("/text/toto.txt");
+        portTextfield.setText("1026");
         chercher.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(final ActionEvent e) {
@@ -84,7 +87,7 @@ public class Main extends Application {
                         try {
                             client.runClient(hostTextfield.getText(), pathTextfield.getText(), Integer.parseInt(portTextfield.getText()));
 
-                            URL content = new URL("http://" + hostTextfield.getText() + ":" + Integer.parseInt(portTextfield.getText()) + "" + pathTextfield.getText());
+                            URL content = this.getClass().getResource("/download"+pathTextfield.getText());
                             engine.load(content.toString());
                         } catch (IOException ex) {
                             System.out.println(ex);
