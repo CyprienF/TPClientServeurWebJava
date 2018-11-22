@@ -115,6 +115,8 @@ public class ChildServeur implements Runnable {
                     return  send404Error(route[1]);
                 }
 
+            }else{
+                return  send404Error(route[1]);
             }
                 toSend+="\n\n";
 
@@ -130,7 +132,7 @@ public class ChildServeur implements Runnable {
                 "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
                 "Server: Apache/2.2.14 (Win32) \r\n" +
                 "Content-Length: 230 \r\n" +
-                "Content-Type: text/html; charset=iso-8859-1 \r\n" +
+                "Content-Type: text/html\r\n" +
                 "Connection: Closed \r\n" +
                 "\r\n";
         toSend+="!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
@@ -148,7 +150,7 @@ public class ChildServeur implements Runnable {
                 "Date: "+  OffsetDateTime.now().toString() +"\r\n" +
                 "Server: Apache/2.2.14 (Win32) \r\n" +
                 "Content-Length: 230 \r\n" +
-                "Content-Type: text/html; charset=iso-8859-1 \r\n" +
+                "Content-Type: text\r\n" +
                 "Connection: Closed \r\n" +
                 "\r\n";
         toSend+="<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
@@ -160,7 +162,7 @@ public class ChildServeur implements Runnable {
                 "\n" +
                 "<body>\n" +
                 "   <h1>Not Found</h1>\n" +
-                "   <p>The requested URL "+path+"was not found on this server.</p>\n" +
+                "   <p>The requested URL "+path+" was not found on this server.</p>\n" +
                 "</body>\n" +
                 "\n" +
                 "</html>";

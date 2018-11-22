@@ -85,9 +85,8 @@ public class Main extends Application {
                     public void handle(final ActionEvent e) {
                         client = new Client();
                         try {
-                            client.runClient(hostTextfield.getText(), pathTextfield.getText(), Integer.parseInt(portTextfield.getText()));
-
-                            URL content = this.getClass().getResource("/download"+pathTextfield.getText());
+                            String path=client.runClient(hostTextfield.getText(), pathTextfield.getText(), Integer.parseInt(portTextfield.getText()));
+                            URL content = this.getClass().getResource(path);
                             engine.load(content.toString());
                         } catch (IOException ex) {
                             System.out.println(ex);

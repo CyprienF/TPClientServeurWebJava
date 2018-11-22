@@ -24,7 +24,7 @@ public class Client {
         this.socket = socket;
     }
 
-    public void runClient(String host, String path, int port) throws IOException {
+    public String runClient(String host, String path, int port) throws IOException {
 
         this.socket = new Socket(host, port);
 
@@ -41,11 +41,12 @@ public class Client {
         System.out.println("bug corrected");
 
         String body = getBody(response);
-        writeFile(path,body,isBodyImage(response));
+        String filePath=writeFile(path,body,isBodyImage(response));
 
         out.close();
         in.close();
         this.closeSocket();
+        return  filePath;
     }
 
     private static void sendMessage(DataOutputStream out, String request) throws IOException {
@@ -96,11 +97,14 @@ public class Client {
         return body;
     }
 
-    private void writeFile(String path,String body, boolean isImage){
+    private String writeFile(String path,String body, boolean isImage){
+
+        String newPath ="/download"+path;
         try {
-            File outputfile = new File("./src/main/resources/download"+path);
+
         if(isImage){
 
+            File outputfile = new File("./src/main/resources/download"+path);
             BufferedImage image = null;
             byte[] imageByte;
 
@@ -119,6 +123,17 @@ public class Client {
 
         }else{
             System.out.println(body);
+            String[] decomposedPath= path.split("/");
+            String fileName[]= (decomposedPath[decomposedPath.length-1]).split("\\.");
+            String formatName = fileName[fileName.length-1];
+            File outputfile;
+            if(formatName.equals("txt") || formatName.equals("html") ){
+                outputfile = new File("./src/main/resources/download"+path);
+            }else{
+                newPath="/download/error.html";
+                outputfile= new File("./src/main/resources/download/error.html");
+            }
+
             FileWriter fileWriter = new FileWriter(outputfile);
             fileWriter.write(body);
             fileWriter.flush();
@@ -127,7 +142,7 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        return newPath;
     }
     private void closeSocket() {
         try {
