@@ -162,7 +162,7 @@ public class ChildServeur implements Runnable {
                 "\n" +
                 "<body>\n" +
                 "   <h1>Not Found</h1>\n" +
-                "   <p>The requested URL "+path+" was not found on this server.</p>\n" +
+                "   <p>The requested URL was not found on this server.</p>\n" +
                 "</body>\n" +
                 "\n" +
                 "</html>";

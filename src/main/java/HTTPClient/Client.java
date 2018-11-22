@@ -83,7 +83,6 @@ public class Client {
         boolean bodyFound=false;
         while (sc.hasNextLine()){
             tmp=sc.nextLine();
-            System.out.println(tmp);
             if(bodyFound){
                 body+=tmp+"\r\n";
             }
