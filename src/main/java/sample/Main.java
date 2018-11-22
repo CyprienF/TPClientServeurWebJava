@@ -71,12 +71,12 @@ public class Main extends Application {
         WebEngine engine = webView.getEngine();
         URL url = this.getClass().getResource("/text/toto.txt");
         engine.load(url.toString());
+        webView.setMaxSize(500, 500);
+        webView.setMinSize(500, 100);
 
-        // Charger du texte brut
-        //engine.loadContent("Salut");
+        webView.setLayoutX(10);
+        webView.setLayoutY(150);
 
-        GridPane.setConstraints(webView, 2, 4);
-        grid.getChildren().add(webView);
         hostTextfield.setText("127.0.0.1");
         pathTextfield.setText("/text/toto.txt");
         portTextfield.setText("1026");
@@ -97,6 +97,7 @@ public class Main extends Application {
         // Groupe des éléments de la scène
         Group group = new Group();
         group.getChildren().add(grid);
+        group.getChildren().add(webView);
 
         // Affichage de la scène
         primaryStage.setScene(new Scene(group));

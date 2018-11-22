@@ -1,15 +1,12 @@
 package HTTPClient;
 
-import javafx.scene.web.WebEngine;
 import sun.misc.BASE64Decoder;
 import sun.misc.IOUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.io.*;
 import java.net.Socket;
-import java.nio.Buffer;
 import java.util.Scanner;
 
 public class Client {
