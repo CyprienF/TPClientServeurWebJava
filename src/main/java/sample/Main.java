@@ -69,8 +69,8 @@ public class Main extends Application {
         // Webview
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
-        URL url = this.getClass().getResource("/text/toto.txt");
-        engine.load(url.toString());
+        //URL url = this.getClass().getResource("/text/toto.txt");
+        //engine.load(url.toString());
         webView.setMaxSize(500, 500);
         webView.setMinSize(500, 100);
 
